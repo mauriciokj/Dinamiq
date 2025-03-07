@@ -9,6 +9,7 @@ Rails.application.routes.draw do
 # Cria enquete
 resources :polls, only: [ :index,  :create, :show ]
   post "/polls/:token/vote", to: "votes#create"
+  get "/polls/:token/check_vote", to: "votes#check_vote"
 
   # Defines the root path route ("/")
   # root "posts#index"
