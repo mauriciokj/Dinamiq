@@ -7,7 +7,7 @@ projects:
     type: "rails"
     port: 3005
     path: "."
-    start_command: "rails server -p 3005"
+    start_command: "rails server -p 3005 -b 0.0.0.0"
     description: "API Rails para sistema de enquetes em tempo real"
     
   frontend:

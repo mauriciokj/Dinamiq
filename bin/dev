@@ -163,7 +163,7 @@ start_backend() {
     
     # Inicia o servidor Rails
     echo -e "${GREEN}✅ Iniciando servidor Rails na porta 3005...${NC}"
-    bundle exec rails server -p 3005
+    bundle exec rails server -p 3005 -b 0.0.0.0
 }
 
 # Função para iniciar o backend em background
@@ -181,7 +181,7 @@ start_backend_background() {
     
     # Inicia o servidor Rails em background
     echo -e "${GREEN}✅ Iniciando servidor Rails na porta 3005 (background)...${NC}"
-    bundle exec rails server -p 3005 > /dev/null 2>&1 &
+    bundle exec rails server -p 3005 -b 0.0.0.0 > /dev/null 2>&1 &
     
     # Salva o PID do processo para poder matá-lo depois
     BACKEND_PID=$!
