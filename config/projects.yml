@@ -1,0 +1,42 @@
+# Configuração dos projetos DinamiQ
+# Este arquivo define as configurações para o desenvolvimento local
+
+projects:
+  backend:
+    name: "DinamiQ Backend"
+    type: "rails"
+    port: 3005
+    path: "."
+    start_command: "rails server -p 3005"
+    description: "API Rails para sistema de enquetes em tempo real"
+    
+  frontend:
+    name: "Poll-Front"
+    type: "react"
+    port: 3009
+    path: "../poll-front"
+    start_command: "npm run dev"
+    description: "Interface React para visualização e criação de enquetes"
+
+# Configurações gerais
+development:
+  project_name: "DinamiQ"
+  project_description: "Sistema de enquetes em tempo real com Rails + React"
+  required_services: []
+  
+# URLs de desenvolvimento
+urls:
+  backend: "http://localhost:3005"
+  frontend: "http://localhost:3009"
+  api_base: "http://localhost:3005"
+  websocket: "ws://localhost:3005/cable"
+
+# Dependências e verificações
+dependencies:
+  backend:
+    - "ruby"
+    - "rails"
+    - "bundle"
+  frontend:
+    - "node"
+    - "npm"
