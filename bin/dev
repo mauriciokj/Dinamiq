@@ -166,6 +166,43 @@ start_backend() {
     bundle exec rails server -p 3005
 }
 
+# Função para iniciar o backend em background
+start_backend_background() {
+    echo -e "${BLUE}🚀 Iniciando DinamiQ Backend (Rails) em background...${NC}"
+    
+    # Libera a porta se estiver ocupada
+    kill_port_process 3005 "Rails"
+    
+    # Verifica se as gems estão instaladas
+    if [[ ! -f "Gemfile.lock" ]]; then
+        echo -e "${YELLOW}🔄 Instalando gems...${NC}"
+        bundle install
+    fi
+    
+    # Inicia o servidor Rails em background
+    echo -e "${GREEN}✅ Iniciando servidor Rails na porta 3005 (background)...${NC}"
+    bundle exec rails server -p 3005 > /dev/null 2>&1 &
+    
+    # Salva o PID do processo para poder matá-lo depois
+    BACKEND_PID=$!
+    echo -e "${CYAN}📝 Backend PID: $BACKEND_PID${NC}"
+    
+    # Função para limpar processos ao sair
+    cleanup() {
+        echo -e "\n${YELLOW}🔄 Parando serviços...${NC}"
+        if [[ -n "$BACKEND_PID" ]]; then
+            kill $BACKEND_PID 2>/dev/null || true
+            echo -e "${GREEN}✅ Backend parado${NC}"
+        fi
+        kill_port_process 3005 "Rails"
+        kill_port_process 3009 "React"
+        exit 0
+    }
+    
+    # Configura trap para limpar processos ao receber Ctrl+C
+    trap cleanup SIGINT SIGTERM
+}
+
 # Função para iniciar o frontend
 start_frontend() {
     echo -e "${BLUE}🚀 Iniciando Poll-Front (React)...${NC}"
@@ -190,6 +227,25 @@ start_frontend() {
     
     # Inicia o servidor de desenvolvimento
     echo -e "${GREEN}✅ Iniciando servidor React na porta 3009...${NC}"
+    
+    # Se foi chamado pelo start_all, configura trap para limpeza
+    if [[ "${CALLED_FROM_START_ALL}" == "true" ]]; then
+        # Função para limpar processos ao sair
+        cleanup_frontend() {
+            echo -e "\n${YELLOW}🔄 Parando serviços...${NC}"
+            if [[ -n "$BACKEND_PID" ]]; then
+                kill $BACKEND_PID 2>/dev/null || true
+                echo -e "${GREEN}✅ Backend parado${NC}"
+            fi
+            kill_port_process 3005 "Rails"
+            kill_port_process 3009 "React"
+            exit 0
+        }
+        
+        # Configura trap para limpar processos ao receber Ctrl+C
+        trap cleanup_frontend SIGINT SIGTERM
+    fi
+    
     npm run dev
 }
 
@@ -220,8 +276,14 @@ start_all() {
     echo -e "${YELLOW}💡 Use Ctrl+C para parar ambos os serviços${NC}"
     echo ""
     
+    # Define que foi chamado pelo start_all
+    export CALLED_FROM_START_ALL="true"
+    
     # Inicia o backend em background
     start_backend_background
+    
+    # Exporta o PID do backend para o frontend poder acessar
+    export BACKEND_PID
     
     # Aguarda um pouco para o backend inicializar
     sleep 3
